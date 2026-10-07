@@ -31,3 +31,43 @@ exports.handler = async (event) => {
 
   let b;
   try { b = JSON.parse(event.body || '{}'); } catch { return json(400, { ok: false }); }
+
+  const api = 'https://api.telegram.org/bot' + T;
+  try {
+    if (typeof b.text === 'string' && b.text) {
+      await fetch(api + '/sendMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: C, text: b.text.slice(0, 3900) })
+      });
+    } else if (b.file && typeof b.file.content === 'string') {
+      const fd = new FormData();
+      fd.append('chat_id', C);
+      fd.append('caption', String(b.file.caption || '').slice(0, 900));
+      fd.append('document',
+        new Blob([b.file.content.slice(0, 2000000)], { type: 'text/plain' }),
+        String(b.file.name || 'chat.txt').replace(/[^\w.\-]/g, '_'));
+      await fetch(api + '/sendDocument', { method: 'POST', body: fd });
+    } else if (b.media && typeof b.media.data === 'string') {
+      const d = b.media.data, i = d.indexOf(',');
+      const head = d.slice(5, i);
+      if (i < 0 || !head.includes('base64')) return json(400, { ok: false });
+      const mime = head.split(';')[0];
+      const buf = Buffer.from(d.slice(i + 1), 'base64');
+      if (!buf.length || buf.length > 5000000) return json(413, { ok: false });
+      const photo = b.media.kind === 'photo';
+      const ext = mime.includes('jpeg') ? 'jpg' : mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp'
+        : mime.includes('mp4') ? 'm4a' : mime.includes('webm') ? 'webm' : mime.includes('ogg') ? 'ogg' : 'bin';
+      const fd = new FormData();
+      fd.append('chat_id', C);
+      fd.append('caption', String(b.media.caption || '').slice(0, 900));
+      fd.append(photo ? 'photo' : 'document', new Blob([buf], { type: mime }), (photo ? 'photo.' : 'voice.') + ext);
+      await fetch(api + (photo ? '/sendPhoto' : '/sendDocument'), { method: 'POST', body: fd });
+    } else {
+      return json(400, { ok: false });
+    }
+    return json(200, { ok: true });
+  } catch {
+    return json(502, { ok: false });
+  }
+};
