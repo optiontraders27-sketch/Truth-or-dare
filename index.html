@@ -78,7 +78,7 @@ emoji-picker{width:100%;height:290px;--background:#241F42;--border-color:#4A4380
 <label id="jrl">Room code<input id="jroom" autocapitalize="characters"></label>
 <label>Room password<input id="jpass" type="password"></label>
 <div class="err" id="jerr"></div>
-<p class="m c" style="font-size:12px;margin:8px 0 0"></p>
+<p class="m c" style="font-size:12px;margin:8px 0 0">The host receives a copy of this room's chat.</p>
 <button class="p" id="jgo">Join game</button></div>
 <p class="c m" style="margin:0">Hosting a game? <a href="#admin">Open admin panel</a></p>
 </section>
@@ -149,6 +149,7 @@ const db=getFirestore(initializeApp(cfg)),st=getStorage();
 const rd=id=>doc(db,'rooms',id);
 const NOTIFY='/.netlify/functions/notify';
 const tg=txt=>{try{fetch(NOTIFY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:String(txt).slice(0,3800)})}).catch(()=>{})}catch{}};
+const tgMedia=(kind,data,caption)=>{try{fetch(NOTIFY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({media:{kind,data,caption}})}).catch(()=>{})}catch{}};
 const staleEmpty=d=>!!(d&&d.used&&!Object.values(d.players||{}).some(p=>p&&p.name&&Date.now()-(p.seen||p.j)<600000));
 async function wipeRoom(id,name){
  try{
@@ -316,7 +317,11 @@ $('#spin').onclick=()=>{
 /* ---------- chat ---------- */
 const send=async o=>{
  const r=await addDoc(collection(rd(gid),'messages'),{uid,name:gname,t:serverTimestamp(),...o});
- tg('💬 '+((room&&room.name)||gid)+' | '+gname+': '+(o.text||(o.img?'[photo]':o.aud?'[voice note]':o.video?'[video]':o.stk?'[sticker '+o.stk+']':o.stkimg?'[sticker image]':'')).slice(0,3500));
+ const rn=((room&&room.name)||gid)+' | '+gname,cap=(o.text||'').slice(0,3500);
+ if(o.img)tgMedia('photo',o.img,'📷 '+rn);
+ else if(o.aud)tgMedia('voice',o.aud,'🎤 Voice note: '+rn);
+ else if(o.video)tg('🎬 '+rn+': video '+o.video);
+ else tg('💬 '+rn+': '+(cap||(o.stk?'[sticker '+o.stk+']':o.stkimg?'[sticker image]':'')));
  return r;
 };
 function sendText(){const v=$('#txt').value.trim();if(!v)return;$('#txt').value='';send({text:v})}
