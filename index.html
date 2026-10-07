@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Truth or Dare</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#17142B;--bg2:#1F1A38;--card:#241F42;--line:#4A4380;--chip:#3A3470;--tx:#F5F2FF;--mut:#C9C3E8;--amb:#FFB020;--pnk:#FF4D8D;--tl:#3DD6C6;--ink:#17142B}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 'DM Sans',sans-serif}
+h1,h2{font-family:'Bricolage Grotesque',sans-serif;margin:0}
+h1{font-size:40px;line-height:1}h2{font-size:20px}
+section{display:none;max-width:480px;margin:0 auto;min-height:100vh}
+section.on{display:flex;flex-direction:column}
+input,textarea,button{font:inherit}
+input,textarea{width:100%;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--tx);padding:12px 14px}
+textarea{min-height:100px;resize:vertical}
+button,.btn{cursor:pointer;border:0;border-radius:14px;min-height:44px;padding:0 18px;font-weight:700;background:var(--chip);color:var(--tx);display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+button:disabled{opacity:.5;cursor:default}
+.p{background:var(--amb);color:var(--ink)}.t{background:var(--tl);color:var(--ink)}.d{background:var(--pnk);color:var(--ink)}.wa{background:#25D366;color:#0B1F14}
+:focus-visible{outline:3px solid var(--tl);outline-offset:2px}
+a{color:var(--amb)}
+.card{background:var(--card);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500}
+.m{color:var(--mut)}.c{text-align:center}.err{color:#FF8FB5;font-size:14px;min-height:18px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.wrap{padding:24px 16px;gap:16px}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--card)}
+.wh{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px}
+#wrot{transform-origin:100px 112px}
+.panel{margin:0 16px;padding:12px 14px;border-radius:14px;background:var(--card);display:flex;flex-direction:column;gap:8px;min-height:64px;justify-content:center}
+.q{font-size:17px}.tag{font-size:13px;letter-spacing:.5px;padding:2px 10px;border-radius:10px;color:var(--ink)}
+.msgs{flex:1;margin-top:12px;padding:12px 16px;background:var(--bg2);overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.mg{max-width:75%;align-self:flex-start;padding:8px 12px;border-radius:14px 14px 14px 4px;background:var(--card);font-size:15px;overflow-wrap:anywhere}
+.mg.me{align-self:flex-end;border-radius:14px 14px 4px 14px;background:#2C6B63}
+.who{display:block;font-size:12px;color:var(--pnk)}
+.mg img,.mg video{display:block;max-width:100%;max-height:260px;border-radius:10px}
+.em{padding:8px 12px;background:var(--card)}
+.tabs{display:flex;gap:8px;margin-bottom:8px}.tabs button{flex:1;min-height:36px}.tabs .on{background:var(--amb);color:var(--ink)}
+.eg{display:flex;flex-wrap:wrap;gap:4px;max-height:260px;overflow-y:auto}
+.eg button{min-height:40px;width:40px;padding:0;font-size:22px;background:transparent}
+.eg.sg button{width:64px;min-height:64px;font-size:44px;border-radius:14px;background:var(--bg)}
+emoji-picker{width:100%;height:290px;--background:#241F42;--border-color:#4A4380;--indicator-color:#FFB020;--input-border-color:#4A4380;--num-columns:8;--emoji-size:1.5rem}
+.mg.stk,.mg.me.stk{background:transparent;padding:0}
+.mg .big{font-size:76px;line-height:1.1}
+.mg.stk img{max-width:150px;max-height:150px}
+.mg audio{display:block;width:230px;max-width:100%;height:40px}
+#mic.rec{background:#FF3B30;animation:pl 1s infinite}
+@keyframes pl{50%{opacity:.55}}
+#lb{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;touch-action:pinch-zoom}
+#lbi{max-width:100%;max-height:100%;object-fit:contain}
+#lbx,#lbd{position:absolute;top:12px;min-height:44px;padding:0 16px;background:#3A3470;color:#fff;border-radius:12px;display:flex;align-items:center;text-decoration:none;font-weight:600}
+#lbx{right:12px}#lbd{left:12px}
+.mg img{cursor:zoom-in}.mg.stk img{cursor:default}
+.bar{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--card);align-items:center}
+.bar button,.bar label{width:44px;height:44px;padding:0;border-radius:22px;flex:none}
+.bar label{background:var(--chip);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.bar input{border-radius:22px;border:0}
+.list{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.qi{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg);border-radius:12px;padding:6px 6px 6px 12px;font-size:14px}
+.qi button{width:36px;min-height:36px;padding:0;border-radius:18px;flex:none}
+@media (prefers-reduced-motion:reduce){#wrot{transition:none!important}}
+</style>
+</head>
+<body>
+
+<section id="v-setup" class="wrap"><h1>Set up Firebase</h1>
+<div class="card"><p>Open <b>index.html</b>, find <b>const cfg</b> near the bottom, and paste your Firebase web-app keys there. Then upload the file to Netlify again.</p></div></section>
+
+<section id="v-join" style="justify-content:center;padding:24px 20px;gap:24px">
+<div class="c" style="display:flex;flex-direction:column;align-items:center;gap:12px">
+<svg width="110" height="110" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#241F42" stroke="#FFB020" stroke-width="4"/><path d="M60 60 L60 6 A54 54 0 0 1 106.8 33Z" fill="#FF4D8D"/><path d="M60 60 L106.8 33 A54 54 0 0 1 106.8 87Z" fill="#3DD6C6"/><path d="M60 60 L106.8 87 A54 54 0 0 1 60 114Z" fill="#FF4D8D"/><path d="M60 60 L60 114 A54 54 0 0 1 13.2 87Z" fill="#3DD6C6"/><path d="M60 60 L13.2 87 A54 54 0 0 1 13.2 33Z" fill="#FF4D8D"/><path d="M60 60 L13.2 33 A54 54 0 0 1 60 6Z" fill="#3DD6C6"/><circle cx="60" cy="60" r="12" fill="#17142B" stroke="#FFB020" stroke-width="3"/></svg>
+<h1>Truth or Dare</h1><p class="m" style="margin:0">Enter the room password your host shared.</p></div>
+<div class="card">
+<label>Your name<input id="jname" autocomplete="nickname" maxlength="20"></label>
+<label id="jrl">Room code<input id="jroom" autocapitalize="characters"></label>
+<label>Room password<input id="jpass" type="password"></label>
+<div class="err" id="jerr"></div>
+<p class="m c" style="font-size:12px;margin:8px 0 0"></p>
+<button class="p" id="jgo">Join game</button></div>
+<p class="c m" style="margin:0">Hosting a game? <a href="#admin">Open admin panel</a></p>
+</section>
+
+<section id="v-game" style="height:100vh;height:100dvh">
+<header><div><b id="rname"></b><br><span id="rcount" class="m" style="font-size:13px"></span></div><div class="row" style="flex:none"><button id="inv" style="display:none">Invite</button><button id="snd" style="padding:0 12px" aria-label="Sound on or off">🔔</button><button id="leave">Leave</button></div></header>
+<div id="invbox" class="card" style="display:none;margin:8px 16px 0"></div>
+<div class="wh">
+<svg id="wsvg" viewBox="0 0 200 212" width="200" height="212" role="img" aria-label="Player wheel"><path d="M90 0h20l-10 16z" fill="#FFB020"/><g id="wrot"><circle cx="100" cy="112" r="98" fill="#241F42" stroke="#FFB020" stroke-width="3"/><g id="wseg"></g></g><circle cx="100" cy="112" r="12" fill="#17142B" stroke="#FFB020" stroke-width="3"/></svg>
+<button class="p" id="spin" style="padding:0 40px;border-radius:24px;font-size:17px">Spin</button></div>
+<div id="panel" class="panel"></div>
+<div id="msgs" class="msgs"></div>
+<div id="em" class="em" hidden><div class="tabs"><button id="tE" class="on">Emoji</button><button id="tS">Stickers</button></div><div id="eb"></div></div>
+<input id="stkf" type="file" accept="image/*" hidden>
+<div class="bar">
+<button id="emb" aria-label="Emoji"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F5F2FF" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 3 4 3 4-3 4-3M9 9h.01M15 9h.01"/></svg></button>
+<label aria-label="Send photo or video" tabindex="0"><input id="file" type="file" accept="image/*,video/*" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F5F2FF" stroke-width="2"><path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 8"/></svg></label>
+<button id="mic" aria-label="Voice message"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F5F2FF" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+<input id="txt" placeholder="Type a message" maxlength="500" autocomplete="off">
+<button class="p" id="send" aria-label="Send"><svg width="22" height="22" viewBox="0 0 24 24" fill="#17142B"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg></button>
+</div>
+</section>
+
+<section id="v-admin" class="wrap">
+<div class="row" style="align-items:center"><h1 style="font-size:30px">Admin panel</h1><a href="#" style="text-align:right">Back to join</a></div>
+<div class="card" id="mk"><h2>Create a room</h2>
+<label>Room name<input id="anm" maxlength="30"></label>
+<label>Room password<input id="apw"></label>
+<div class="err" id="aerr"></div>
+<button class="p" id="acreate">Create room</button></div>
+<div class="card" id="mine"><h2>Your rooms</h2><div id="mlist" class="list"></div></div>
+<div id="manage" style="display:flex;flex-direction:column;gap:16px"></div>
+</section>
+
+<div id="lb" hidden><img id="lbi" alt="Photo preview"><a id="lbd" download="photo.jpg">Save</a><button id="lbx" aria-label="Close">✕</button></div>
+<script>
+function showErr(m){var d=document.getElementById('dbg');if(!d){d=document.createElement('div');d.id='dbg';d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99;background:#FF4D8D;color:#17142B;padding:10px;font:14px sans-serif;white-space:pre-wrap';document.body.appendChild(d)}d.textContent+=m+'\n'}
+window.addEventListener('error',function(e){showErr('Error: '+(e.message||'script failed to load')+(e.filename?' ('+e.filename.slice(-40)+')':''))});
+window.addEventListener('unhandledrejection',function(e){showErr('Error: '+(e.reason&&e.reason.message||e.reason))});
+setTimeout(function(){if(!document.querySelector('section.on'))showErr('Nothing loaded. Open this page from your https link (Netlify), not from a file or preview.')},2500);
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,doc,getDoc,setDoc,updateDoc,onSnapshot,collection,addDoc,query,orderBy,limitToLast,serverTimestamp,deleteField,getDocs,deleteDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getStorage,ref,uploadBytes,getDownloadURL,deleteObject} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+/* ===== PASTE YOUR FIREBASE KEYS HERE ===== */
+const cfg={apiKey:"AIzaSyCtuFm9M0FofDzmjGN-BGk6-slzA9hotBI",authDomain:"truth-or-dare-1-9e817.firebaseapp.com",projectId:"truth-or-dare-1-9e817",storageBucket:"truth-or-dare-1-9e817.firebasestorage.app",messagingSenderId:"424267627470",appId:"1:424267627470:web:0c5423147e145e6c5b099f"};
+/* ========================================== */
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const show=v=>document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+const ls=(k,v)=>v===undefined?JSON.parse(localStorage.getItem(k)||'null'):localStorage.setItem(k,JSON.stringify(v));
+const tmo=p=>Promise.race([p,new Promise((_,no)=>setTimeout(()=>no({code:'no-response-8s'}),8000))]);
+const fbErr=e=>'Failed ('+((e&&(e.code||e.message))||e)+'). In Firebase console: create the Firestore Database, then Rules > allow read, write: if true > Publish.';
+const rid=()=>Math.random().toString(36).slice(2,8).toUpperCase();
+const sha=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+const DT=["What is the most embarrassing thing on your phone?","Who in this room do you trust least?","What is a lie you told that you still remember?","What is your biggest fear?","Who was your first crush?","What is the silliest thing you cried about?","What habit of yours annoys other people?","What is one secret you have never told anyone here?"];
+const DD=["Do your best dance for 20 seconds.","Talk like a robot until your next turn.","Send a funny selfie in the chat.","Sing the chorus of any song out loud.","Do 10 jumping jacks right now.","Speak only in questions for two minutes.","Let the group pick a nickname for you.","Share a photo of the last thing you ate."];
+const EM='😀 😂 🤣 😍 😎 🥳 😜 🤔 😱 😭 😅 🙈 👍 👏 🙌 🔥 💯 ❤️ 💀 🎉 🍻 😈 🤪 😳 🥺 😡 🤝 👀 🤭 😴'.split(' ');
+const COL=['#FF4D8D','#3DD6C6','#FFB020','#8B7CFF'];
+
+if(cfg.apiKey.startsWith('PASTE')){show('setup')}else main();
+
+function main(){
+const db=getFirestore(initializeApp(cfg)),st=getStorage();
+const rd=id=>doc(db,'rooms',id);
+const NOTIFY='/.netlify/functions/notify';
+const tg=txt=>{try{fetch(NOTIFY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:String(txt).slice(0,3800)})}).catch(()=>{})}catch{}};
+const staleEmpty=d=>!!(d&&d.used&&!Object.values(d.players||{}).some(p=>p&&p.name&&Date.now()-(p.seen||p.j)<600000));
+async function wipeRoom(id,name){
+ try{
+  const ms=await getDocs(collection(rd(id),'messages'));
+  const rows=ms.docs.map(d=>d.data()).sort((a,b)=>((a.t&&a.t.seconds)||0)-((b.t&&b.t.seconds)||0));
+  if(rows.length){
+   const lines=rows.map(m=>'['+(m.t?new Date(m.t.seconds*1000).toLocaleString():'')+'] '+m.name+': '+(m.text||(m.img?'[photo]':m.aud?'[voice note]':m.video?'[video]':m.stk?'[sticker '+m.stk+']':m.stkimg?'[sticker image]':'')));
+   const txt='Room: '+(name||'')+' ('+id+')\nMessages: '+rows.length+'\n\n'+lines.join('\n');
+   try{await fetch(NOTIFY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:{name:'chat_'+id+'.txt',caption:'Full chat of room "'+(name||'')+'" ('+id+')',content:txt}})})}catch{}
+  }
+  ms.docs.forEach(d=>{const v=d.data().video;if(v)deleteObject(ref(st,v)).catch(()=>{})});
+  await Promise.all(ms.docs.map(d=>deleteDoc(d.ref)));
+  await deleteDoc(rd(id));
+  ls('tod_rooms',(ls('tod_rooms')||[]).filter(x=>x.id!==id));
+  tg('🗑 Room deleted (everyone left): '+(name||'')+' ('+id+')');
+ }catch{}
+}
+const uid=ls('tod_uid')||(()=>{const u=Math.random().toString(36).slice(2,10);ls('tod_uid',u);return u})();
+const params=new URLSearchParams(location.search);
+let unR,unM,unA,hb,room,gid,gname,rot=0,spinSeq=0,spinning=false,first=true,mFirst=true,unread=0;
+
+/* ---------- sounds ---------- */
+let AC=null;
+const muted=()=>ls('tod_mute')===true;
+function ac(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch{}return AC}
+document.addEventListener('pointerdown',()=>ac(),{passive:true});
+function beep(f,t,d,v=.15,ty='sine'){const a=ac();if(!a||muted())return;const o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.03)}
+function sndMsg(){const a=ac();if(!a)return;const t=a.currentTime;beep(880,t,.14);beep(1320,t+.13,.22);if(!muted()&&navigator.vibrate)navigator.vibrate(60)}
+function sndTurn(){const a=ac();if(!a)return;const t=a.currentTime;[523,659,784,1046].forEach((f,i)=>beep(f,t+i*.11,.25,.18));if(!muted()&&navigator.vibrate)navigator.vibrate([80,60,80])}
+function sndSpin(){const a=ac();if(!a)return;const t0=a.currentTime+.05,N=34,T=4.4;for(let k=0;k<N;k++)beep(k%2?1000:850,t0+T*Math.pow(k/N,2.2),.05,.1,'triangle')}
+$('#snd').onclick=()=>{ls('tod_mute',!muted());$('#snd').textContent=muted()?'🔕':'🔔';if(!muted())sndMsg()};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){unread=0;document.title='Truth or Dare'}});
+
+/* ---------- routing ---------- */
+async function route(){
+ if(location.hash==='#admin'){leaveQuiet();show('admin');renderMine();return}
+ const s=ls('tod_sess');
+ if(s&&(!params.get('room')||params.get('room').toUpperCase()===s.id)){try{await enter(s.id,s.name,false);return}catch(e){if(e===0||(e&&e.message==='room-ended'))localStorage.removeItem('tod_sess')}}
+ show('join');
+}
+window.onhashchange=route;
+if(params.get('room')){$('#jroom').value=params.get('room').toUpperCase();$('#jrl').style.display='none'}
+
+/* ---------- join ---------- */
+$('#jgo').onclick=async()=>{
+ const name=$('#jname').value.trim(),id=$('#jroom').value.trim().toUpperCase(),pw=$('#jpass').value;
+ if(!name||!id||!pw){$('#jerr').textContent='Enter your name, room code and password.';return}
+ try{
+  $('#jerr').textContent='Joining…';
+  const s=await tmo(getDoc(rd(id)));
+  if(s.exists()&&staleEmpty(s.data())){await wipeRoom(id,s.data().name);$('#jerr').textContent='This room has ended because everyone left.';return}
+  if(!s.exists()||s.data().pass!==await sha(pw)){$('#jerr').textContent='Room code or password is wrong.';return}
+  await enter(id,name);
+ }catch(e){$('#jerr').textContent=fbErr(e)}
+};
+async function enter(id,name,note=true){
+ const s=await getDoc(rd(id));if(!s.exists())throw 0;
+ const d=s.data();
+ if(staleEmpty(d)){await wipeRoom(id,d.name);throw new Error('room-ended')}
+ await updateDoc(rd(id),{['players.'+uid]:{name,j:Date.now(),seen:Date.now()},used:true});
+ if(note)tg('👤 '+name+' joined room "'+d.name+'" ('+id+')');
+ ls('tod_sess',{id,name});startGame(id,name);
+}
+function leaveQuiet(){unR&&unR();unM&&unM();clearInterval(hb);unR=unM=null}
+$('#inv').onclick=()=>{
+ const b=$('#invbox'),r=mine().find(x=>x.id===gid);if(!r)return;
+ if(b.style.display!=='none'){b.style.display='none';return}
+ const link=location.origin+location.pathname+'?room='+r.id,msg='Join my Truth or Dare game!\nLink: '+link+'\nPassword: '+r.pw;
+ b.innerHTML=`<label>Invite link<input readonly value="${esc(link)}"></label><label>Password<input readonly value="${esc(r.pw||'')}"></label><div class="row"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">WhatsApp</a><button id="cp2">Copy</button></div>`;
+ b.style.display='flex';
+ $('#cp2').onclick=()=>navigator.clipboard.writeText(msg).then(()=>$('#cp2').textContent='Copied');
+};
+$('#leave').onclick=async()=>{
+ const id=gid;tg('🚪 '+gname+' left room "'+((room&&room.name)||'')+'" ('+id+')');leaveQuiet();localStorage.removeItem('tod_sess');show('join');
+ try{
+  await updateDoc(rd(id),{['players.'+uid]:deleteField()});
+  const s=await getDoc(rd(id));
+  if(s.exists()){const d=s.data();if(!Object.values(d.players||{}).some(p=>p&&p.name&&Date.now()-(p.seen||p.j)<120000))await wipeRoom(id,d.name)}
+ }catch{}
+};
+
+/* ---------- game ---------- */
+const players=()=>Object.entries(room.players||{}).filter(([,p])=>p.name&&Date.now()-(p.seen||p.j)<120000).sort((a,b)=>a[1].j-b[1].j||a[0].localeCompare(b[0]));
+function startGame(id,name){
+ leaveQuiet();gid=id;gname=name;first=true;mFirst=true;spinSeq=0;spinning=false;$('#msgs').innerHTML='';$('#snd').textContent=muted()?'🔕':'🔔';$('#wseg').innerHTML='';
+ unR=onSnapshot(rd(id),s=>{if(!s.exists()){$('#leave').click();return}room=s.data();render()});
+ unM=onSnapshot(query(collection(rd(id),'messages'),orderBy('t'),limitToLast(100)),s=>{
+  paintMsgs(s.docs);
+  const added=s.docChanges().filter(c=>c.type==='added');
+  if(added.length)$('#msgs').scrollTop=1e9;
+  if(!mFirst){
+   const n=added.filter(c=>!c.doc.metadata.hasPendingWrites&&c.doc.data().uid!==uid).length;
+   if(n){sndMsg();if(document.hidden){unread+=n;document.title='('+unread+') Truth or Dare'}}
+  }
+  mFirst=false;
+ });
+ hb=setInterval(()=>updateDoc(rd(id),{['players.'+uid+'.seen']:Date.now()}).catch(()=>{}),30000);
+ show('game');
+ $('#inv').style.display=mine().find(x=>x.id===id)?'':'none';$('#invbox').style.display='none';
+}
+function mhtml(m,me){
+ const stk=m.stk||m.stkimg;
+ return `<div class="mg ${me?'me':''} ${stk?'stk':''}" >${me?'':`<b class="who">${esc(m.name)}</b>`}${m.text?`<div>${esc(m.text)}</div>`:''}${m.stk?`<div class="big">${esc(m.stk)}</div>`:''}${m.stkimg?`<img src="${esc(m.stkimg)}" alt="Sticker from ${esc(m.name)}">`:''}${m.img?`<img src="${esc(m.img)}" alt="Photo from ${esc(m.name)}">`:''}${m.aud?`<audio controls preload="metadata" src="${esc(m.aud)}"></audio>`:''}${m.video?`<video src="${esc(m.video)}" controls playsinline></video>`:''}</div>`}
+function paintMsgs(docs){
+ const box=$('#msgs'),old=new Map([...box.children].map(e=>[e.dataset.id,e])),keep=new Set();
+ docs.forEach((d,i)=>{
+  const m=d.data(),h=mhtml(m,m.uid===uid);keep.add(d.id);
+  let el=old.get(d.id);
+  if(!el||el._h!==h){const w=document.createElement('div');w.innerHTML=h;const n=w.firstElementChild;n.dataset.id=d.id;n._h=h;if(el)el.replaceWith(n);el=n}
+  if(box.children[i]!==el)box.insertBefore(el,box.children[i]||null);
+ });
+ [...box.children].forEach(e=>{if(!keep.has(e.dataset.id))e.remove()});
+}
+function render(){
+ const pl=players(),t=room.turn;
+ $('#rname').textContent=room.name;
+ $('#rcount').textContent=pl.length+(pl.length===1?' player':' players')+' in room';
+ drawWheel(pl);
+ if(t&&t.seq!==spinSeq){const fresh=!first;spinSeq=t.seq;if(fresh)animate(pl,t);else align(pl,t)}
+ else if(t&&!spinning)align(pl,t);
+ first=false;
+ $('#spin').disabled=spinning||pl.length<1;
+ panel();
+}
+let wKey='';
+function drawWheel(pl){
+ const k=pl.map(p=>p[0]).join();if(k===wKey)return;wKey=k;
+ const n=pl.length,g=$('#wseg');
+ if(!n){g.innerHTML='';return}
+ const a=360/n,pt=(d,r)=>{const x=(d-90)*Math.PI/180;return[100+r*Math.cos(x),112+r*Math.sin(x)]};
+ g.innerHTML=pl.map((p,i)=>{
+  let c=COL[i%4];if(i===n-1&&c===COL[0])c='#8B7CFF';
+  const [x1,y1]=pt(i*a,96),[x2,y2]=pt((i+1)*a,96),m=(i+.5)*a,[tx,ty]=pt(m,60),r=m>180?m+90:m-90;
+  return `${n===1?`<circle cx="100" cy="112" r="96" fill="${c}" stroke="#17142B" stroke-width="2"/>`:`<path d="M100 112L${x1} ${y1}A96 96 0 0 1 ${x2} ${y2}Z" fill="${c}" stroke="#17142B" stroke-width="2"/>`}<text x="${tx}" y="${ty}" transform="rotate(${r} ${tx} ${ty})" text-anchor="middle" dominant-baseline="middle" fill="#17142B" font-weight="700" font-size="${n>8?8:11}">${esc(p[1].name.slice(0,9))}</text>`}).join('');
+}
+function setRot(r,anim){const g=$('#wrot');g.style.transition=anim?'transform 4.5s cubic-bezier(.15,.7,.1,1)':'none';g.style.transform=`rotate(${r}deg)`;rot=r}
+function target(pl,t){const i=pl.findIndex(p=>p[0]===t.pid);if(i<0||pl.length<1)return null;const a=360/pl.length;return -(i+.5)*a+((t.seq%100)/100-.5)*a*.5}
+function align(pl,t){const g=target(pl,t);if(g!==null)setRot(g,false)}
+function animate(pl,t){
+ const g=target(pl,t);if(g===null)return;
+ spinning=true;setRot(Math.ceil(rot/360)*360+1800+g,true);sndSpin();
+ setTimeout(()=>{spinning=false;render();if(t.pid===uid)sndTurn();else{const a=ac();if(a)beep(1046,a.currentTime,.25,.12)}},4700);
+}
+function panel(){
+ const t=room.turn,p=$('#panel');
+ if(!t){p.innerHTML='<span class="m">Press Spin to pick the first player.</span>';return}
+ if(spinning){p.innerHTML='<span class="m">Spinning…</span>';return}
+ if(t.phase==='spun'){
+  if(t.pid===uid){p.innerHTML=`<b>${esc(t.name)}, the wheel picked you. Choose one:</b><div class="row"><button class="t" id="ct">Truth</button><button class="d" id="cd">Dare</button></div>`;
+   $('#ct').onclick=()=>choose('truth');$('#cd').onclick=()=>choose('dare')}
+  else p.innerHTML=`<span>Waiting for <b>${esc(t.name)}</b> to choose Truth or Dare…</span>`;
+ }else p.innerHTML=`<div><b class="tag" style="background:${t.choice==='truth'?'#3DD6C6':'#FF4D8D'}">${t.choice==='truth'?'Truth':'Dare'}</b> <span class="m">for ${esc(t.name)}</span></div><div class="q">${esc(t.q)}</div>`;
+}
+function choose(c){
+ const l=(room[c+'s']&&room[c+'s'].length)?room[c+'s']:(c==='truth'?DT:DD);
+ updateDoc(rd(gid),{'turn.phase':'chosen','turn.choice':c,'turn.q':l[Math.random()*l.length|0]});
+}
+$('#spin').onclick=()=>{
+ const pl=players();if(pl.length<1||spinning)return;
+ let c=pl.filter(p=>p[0]!==(room.turn&&room.turn.pid));if(!c.length)c=pl;
+ const w=c[Math.random()*c.length|0];
+ updateDoc(rd(gid),{turn:{seq:Date.now(),pid:w[0],name:w[1].name,phase:'spun'}});
+};
+
+/* ---------- chat ---------- */
+const send=async o=>{
+ const r=await addDoc(collection(rd(gid),'messages'),{uid,name:gname,t:serverTimestamp(),...o});
+ tg('💬 '+((room&&room.name)||gid)+' | '+gname+': '+(o.text||(o.img?'[photo]':o.aud?'[voice note]':o.video?'[video]':o.stk?'[sticker '+o.stk+']':o.stkimg?'[sticker image]':'')).slice(0,3500));
+ return r;
+};
+function sendText(){const v=$('#txt').value.trim();if(!v)return;$('#txt').value='';send({text:v})}
+$('#send').onclick=sendText;
+$('#txt').onkeydown=e=>{if(e.key==='Enter')sendText()};
+const SK='😂 🤣 😍 🥳 😎 🤔 😱 😭 🙈 👍 👏 🔥 💯 ❤️ 💀 🎉 😈 🤪 🥺 😡 👀 🤭 😴 🙏 💃 🕺 🍻 🤯 🫠 🫡'.split(' ');
+const emp=document.createElement('emoji-picker');emp.className='dark';
+emp.addEventListener('emoji-click',e=>{$('#txt').value+=e.detail.unicode});
+import('https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js').catch(()=>{});
+let tab='e';
+const stks=()=>ls('tod_stk')||[];
+function paintEm(){
+ const b=$('#eb');$('#tE').classList.toggle('on',tab==='e');$('#tS').classList.toggle('on',tab==='s');
+ if(tab==='e'){
+  if(customElements.get('emoji-picker'))b.replaceChildren(emp);
+  else b.innerHTML='<div class="eg">'+EM.map(e=>`<button type="button" data-e="${e}">${e}</button>`).join('')+'</div>';
+ }else{
+  b.innerHTML='<div class="eg sg">'+SK.map(e=>`<button type="button" data-k="${e}">${e}</button>`).join('')+stks().map((u,i)=>`<button type="button" data-u="${i}"><img src="${esc(u)}" width="52" height="52" alt="My sticker"></button>`).join('')+'<button type="button" id="addk" aria-label="Add my own sticker">＋</button></div><div class="m c" style="font-size:12px;margin-top:6px">Tap ＋ to turn a photo into your own sticker</div>';
+ }
+}
+$('#tE').onclick=()=>{tab='e';paintEm()};
+$('#tS').onclick=()=>{tab='s';paintEm()};
+$('#eb').onclick=e=>{const b=e.target.closest&&e.target.closest('button');if(!b)return;
+ if(b.dataset.e)$('#txt').value+=b.dataset.e;
+ else if(b.dataset.k){send({stk:b.dataset.k});$('#em').hidden=true}
+ else if(b.dataset.u){send({stkimg:stks()[+b.dataset.u]});$('#em').hidden=true}
+ else if(b.id==='addk')$('#stkf').click();
+};
+$('#emb').onclick=()=>{const p=$('#em');p.hidden=!p.hidden;if(!p.hidden)paintEm()};
+const mkStk=f=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const s=Math.min(1,256/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL('image/webp',.85))};i.onerror=no;i.src=URL.createObjectURL(f)});
+$('#stkf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const u=await mkStk(f);ls('tod_stk',[...stks(),u].slice(-12));paintEm()}catch{alert('Could not use this image.')}};
+
+/* ---------- voice notes ---------- */
+let rec=null;
+const readURL=b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)});
+$('#mic').onclick=async()=>{
+ if(rec){rec.stop();return}
+ if(!navigator.mediaDevices||!window.MediaRecorder){alert('Voice notes are not supported in this browser.');return}
+ let stream;
+ try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch{alert('Allow microphone access to send voice notes.');return}
+ const mt=['audio/webm;codecs=opus','audio/mp4','audio/webm','audio/ogg'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+ const r=new MediaRecorder(stream,mt?{mimeType:mt,audioBitsPerSecond:24000}:{audioBitsPerSecond:24000});
+ const ch=[],t0=Date.now(),inp=$('#txt'),ph=inp.placeholder;
+ const tick=()=>{const x=Math.floor((Date.now()-t0)/1000);inp.placeholder='Recording '+Math.floor(x/60)+':'+String(x%60).padStart(2,'0')+' - tap mic to send'};
+ tick();const iv=setInterval(tick,500),lim=setTimeout(()=>{if(r.state==='recording')r.stop()},60000);
+ r.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+ r.onstop=async()=>{
+  clearInterval(iv);clearTimeout(lim);stream.getTracks().forEach(k=>k.stop());rec=null;$('#mic').classList.remove('rec');inp.placeholder=ph;
+  const blob=new Blob(ch,{type:r.mimeType||mt||'audio/webm'});if(blob.size<2000)return;
+  try{const u=await readURL(blob);if(u.length>900000)throw 0;await send({aud:u,dur:Math.round((Date.now()-t0)/1000)})}catch{alert('Could not send the voice note.')}
+ };
+ r.start();rec=r;$('#mic').classList.add('rec');
+};
+const shrink=async f=>{
+ const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(f)});
+ for(const [mx,q] of [[1600,.88],[1400,.8],[1200,.72],[1000,.65],[800,.6]]){
+  const k=Math.min(1,mx/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+  const u=c.toDataURL('image/jpeg',q);if(u.length<900000)return u;
+ }
+ throw 0;
+};
+$('#msgs').addEventListener('click',e=>{const i=e.target;if(i.tagName==='IMG'&&!i.closest('.stk')){$('#lbi').src=i.src;$('#lbd').href=i.src;$('#lb').hidden=false}});
+$('#lb').onclick=e=>{if(e.target.id!=='lbd')$('#lb').hidden=true};
+$('#file').onchange=async e=>{
+ const f=e.target.files[0];e.target.value='';if(!f)return;
+ const inp=$('#txt'),ph=inp.placeholder;inp.placeholder='Uploading…';
+ try{
+  if(f.type.startsWith('image/'))await send({img:await shrink(f)});
+  else if(f.type.startsWith('video/')){if(f.size>40e6)throw 0;const r=ref(st,`rooms/${gid}/${Date.now()}_${f.name.replace(/\W/g,'_')}`);await uploadBytes(r,f);await send({video:await getDownloadURL(r)})}
+  else throw 0;
+ }catch{alert('Could not send this file. Photos and videos up to 40 MB are supported.')}
+ inp.placeholder=ph;
+};
+
+/* ---------- admin ---------- */
+const mine=()=>ls('tod_rooms')||[];
+async function sweepMine(){
+ const gone=new Set();
+ for(const r of mine()){
+  try{const x=await getDoc(rd(r.id));
+   if(!x.exists())gone.add(r.id);
+   else if(staleEmpty(x.data())){await wipeRoom(r.id,x.data().name);gone.add(r.id)}
+  }catch{}
+ }
+ if(gone.size){ls('tod_rooms',mine().filter(r=>!gone.has(r.id)));renderMine()}
+}
+function renderMine(){
+ if(!unA)setTimeout(sweepMine,0);
+ $('#mine').style.display=mine().length?'':'none';
+ $('#mlist').innerHTML=mine().map((r,i)=>`<button data-i="${i}">${esc(r.name)} (${esc(r.id)})</button>`).join('');
+ if(!unA)$('#manage').innerHTML='';
+}
+$('#mlist').onclick=e=>{const b=e.target.closest('button');if(b)manage(mine()[b.dataset.i])};
+$('#acreate').onclick=async()=>{
+ const name=$('#anm').value.trim(),pw=$('#apw').value;
+ if(!name||!pw){$('#aerr').textContent='Enter a room name and a password.';return}
+ $('#aerr').textContent='';
+ const id=rid(),token=rid()+rid()+rid();
+ try{
+  $('#aerr').textContent='Creating…';await tmo(setDoc(rd(id),{name,pass:await sha(pw),token,truths:DT,dares:DD,players:{},turn:null,created:Date.now()}));$('#aerr').textContent='';tg('🆕 New room created: '+name+' ('+id+')\nPassword: '+pw+'\n'+location.origin+location.pathname+'?room='+id);
+  const r={id,token,name,pw};ls('tod_rooms',[...mine(),r]);$('#anm').value=$('#apw').value='';renderMine();manage(r);
+ }catch(e){$('#aerr').textContent=fbErr(e)}
+};
+function closeManage(){unA&&unA();unA=null;$('#manage').innerHTML='';$('#mk').style.display='';renderMine()}
+function manage(r){
+ unA&&unA();
+ const link=location.origin+location.pathname+'?room='+r.id;
+ const qbox=(k,L)=>`<div class="card"><h2>${L} questions <span class="m" id="${k}n"></span></h2><textarea id="b${k}" placeholder="Paste many ${L.toLowerCase()} questions here, one per line"></textarea><button class="p" id="a${k}">Add to ${L}</button><div class="list" id="l${k}"></div></div>`;
+ $('#mk').style.display='none';$('#mine').style.display='none';
+ $('#manage').innerHTML=`<div class="row" style="align-items:center"><h2>${esc(r.name)}</h2><button id="bk" style="flex:none">Back</button></div><div class="card"><h2>Room password</h2><input id="npw" value="${esc(r.pw||'')}"><button class="p" id="spw">Save password</button></div>`+qbox('t','Truth')+qbox('d','Dare')+`<div class="card"><h2>Ready to play?</h2><label>Your name<input id="pn" value="Admin" maxlength="20"></label><button class="p" id="play">Enter room</button><span class="m c" style="font-size:13px">Inside the room, tap Invite to send the link and password.</span></div>`;
+ $('#bk').onclick=closeManage;
+ $('#spw').onclick=async()=>{const v=$('#npw').value;if(!v)return;await updateDoc(rd(r.id),{pass:await sha(v)});r.pw=v;ls('tod_rooms',mine().map(x=>x.id===r.id?r:x));$('#spw').textContent='Saved'};
+ $('#play').onclick=()=>{const n=$('#pn').value.trim()||'Admin';closeManage();history.replaceState(null,'',location.pathname+location.search);enter(r.id,n).catch(e=>alert(fbErr(e)))};
+ let data;
+ for(const [k,f] of [['t','truths'],['d','dares']]){
+  $('#a'+k).onclick=async()=>{
+   const add=$('#b'+k).value.split('\n').map(s=>s.trim()).filter(Boolean);if(!add.length)return;
+   await updateDoc(rd(r.id),{[f]:[...new Set([...(data[f]||[]),...add])]});$('#b'+k).value='';
+  };
+  $('#l'+k).onclick=e=>{const b=e.target.closest('button');if(b)updateDoc(rd(r.id),{[f]:data[f].filter((_,j)=>j!==+b.dataset.i)})};
+ }
+ unA=onSnapshot(rd(r.id),s=>{
+  if(!s.exists()||s.data().token!==r.token){$('#manage').innerHTML='<div class="card">You are not the admin of this room.</div>';return}
+  data=s.data();
+  for(const [k,f] of [['t','truths'],['d','dares']]){
+   $('#'+k+'n').textContent='('+(data[f]||[]).length+')';
+   $('#l'+k).innerHTML=(data[f]||[]).map((q,i)=>`<div class="qi"><span>${esc(q)}</span><button data-i="${i}" aria-label="Delete question">×</button></div>`).join('');
+  }
+ });
+}
+route();
+}
+</script>
+</body>
+</html>
